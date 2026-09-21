@@ -3,6 +3,12 @@ import random
 # Traits
 INTERNAL_TYPES = ['fatty','strong','weak','thin']
 
+# Create a world.
+class World:
+    def __init__(self):
+        self.width = 100
+        self.height = 100
+
 # Create a worm.
 class Worm:
     def __init__(self):
