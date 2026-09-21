@@ -1,4 +1,3 @@
-import numpy as np
 import random
 
 # Traits
@@ -34,8 +33,19 @@ class Worm:
                 self.width = random.randint(3, 7)
                 self.length = random.randint(8, 14)
 
-        self.size = self.width + self.length
-        self.step = self.width
+        self.size = self.width + self.length  # Worm size.
+        self.step = self.width  # Distance the worm travels at a time.
+        self.max_health = self.health  # Maximum health at the start of the worm's life.
+        self.max_hunger = self.hunger  # Maximum hunger at the start of the worm's life.
+        self.state = 'alive'  # Worm status: alive or dead.
+        self.x = 0  # Worm's starting x-coordinate (birth x-coordinate).
+        self.y = 0  # Worm's starting y-coordinate (birth y-coordinate).
 
+        if self.health <= 0:  # Worm death logic.
+            self.state = 'dead'
 
+    def tick(self):  # Logic for each program tick.
+        self.hunger -= 1
 
+        if self.hunger <= 0:
+            self.health -= 1
