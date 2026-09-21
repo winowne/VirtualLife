@@ -1,4 +1,9 @@
 import random
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+
+cmap = ListedColormap(['#202020', 'pink'])  # Color palette for the grid: black for empty cells and pink for the worm.
 
 # Traits
 INTERNAL_TYPES = ['fatty','strong','weak','thin']
@@ -6,41 +11,35 @@ INTERNAL_TYPES = ['fatty','strong','weak','thin']
 # Create a world.
 class World:
     def __init__(self):
-        self.width = 100
-        self.height = 100
+        self.size = np.array([20, 20])  # World size.
+        self.grid = np.zeros(self.size)  # Each grid cell represents an empty cell (0).
 
 # Create a worm.
 class Worm:
     def __init__(self):
-        self.internals = random.choice(INTERNAL_TYPES)
+        self.internals = random.choice(INTERNAL_TYPES)  # Randomly selected worm trait.
 
         match self.internals:
             case 'strong':  # If the trait is strong.
                 self.health = random.randint(12, 18)  # Health.
                 self.hunger = random.randint(12, 18)  # Hunger units.
-                self.width = random.randint(10, 15)  # Width.
                 self.length = random.randint(12, 18)  # Length.
 
             case 'fatty':  # If the trait is fatty.
                 self.health = random.randint(9, 15)
                 self.hunger = random.randint(20, 30)
-                self.width = random.randint(15, 25)
                 self.length = random.randint(10, 20)
 
             case 'weak':  # If the trait is weak.
                 self.health = random.randint(5, 11)
                 self.hunger = random.randint(6, 15)
-                self.width = random.randint(7, 12)
                 self.length = random.randint(8, 15)
 
             case 'thin':  # If the trait is thin.
                 self.health = random.randint(7, 13)
                 self.hunger = random.randint(5, 10)
-                self.width = random.randint(3, 7)
                 self.length = random.randint(8, 14)
 
-        self.size = self.width + self.length  # Worm size.
-        self.step = self.width  # Distance the worm travels at a time.
         self.max_health = self.health  # Maximum health at the start of the worm's life.
         self.max_hunger = self.hunger  # Maximum hunger at the start of the worm's life.
         self.state = 'alive'  # Worm status: alive or dead.
@@ -55,3 +54,13 @@ class Worm:
 
         if self.hunger <= 0:
             self.health -= 1
+
+worm = Worm()
+world = World()
+
+for i in range(worm.length):  # Draw the worm on the grid according to its length.
+    world.grid[worm.x][worm.y] = 1
+    worm.x += 1
+
+plt.imshow(world.grid, cmap=cmap)  # Display the grid with the worm using the color palette.
+plt.show()
