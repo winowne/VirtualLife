@@ -1,66 +1,122 @@
 import random
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.colors import ListedColormap
 
-cmap = ListedColormap(['#202020', 'pink'])  # Color palette for the grid: black for empty cells and pink for the worm.
 
-# Traits
-INTERNAL_TYPES = ['fatty','strong','weak','thin']
+cmap = ListedColormap([
+    '#202020',
+    'white',
+    '#FCF2F7',
+])  # Empty cells, worm body, worm head, and nutrition.
 
-# Create a world.
-class World:
-    def __init__(self):
-        self.size = np.array([20, 20])  # World size.
-        self.grid = np.zeros(self.size)  # Each grid cell represents an empty cell (0).
+INTERNAL_TYPES = ['fatty', 'strong', 'weak', 'thin']
 
-# Create a worm.
+
+class Nutrition:
+    def __init__(self, size):
+        self.satiety = random.randint(5, 10)
+        self.x = random.randint(0, size[0] - 1)
+        self.y = random.randint(0, size[1] - 1)
+
+
 class Worm:
     def __init__(self):
-        self.internals = random.choice(INTERNAL_TYPES)  # Randomly selected worm trait.
+        self.internals = random.choice(INTERNAL_TYPES)
 
         match self.internals:
-            case 'strong':  # If the trait is strong.
-                self.health = random.randint(12, 18)  # Health.
-                self.hunger = random.randint(12, 18)  # Hunger units.
-                self.length = random.randint(12, 18)  # Length.
+            case 'strong':
+                self.health = random.randint(12, 18)
+                self.hunger = random.randint(12, 18)
 
-            case 'fatty':  # If the trait is fatty.
+            case 'fatty':
                 self.health = random.randint(9, 15)
                 self.hunger = random.randint(20, 30)
-                self.length = random.randint(10, 20)
 
-            case 'weak':  # If the trait is weak.
+            case 'weak':
                 self.health = random.randint(5, 11)
                 self.hunger = random.randint(6, 15)
-                self.length = random.randint(8, 15)
 
-            case 'thin':  # If the trait is thin.
+            case 'thin':
                 self.health = random.randint(7, 13)
                 self.hunger = random.randint(5, 10)
-                self.length = random.randint(8, 14)
 
-        self.max_health = self.health  # Maximum health at the start of the worm's life.
-        self.max_hunger = self.hunger  # Maximum hunger at the start of the worm's life.
-        self.state = 'alive'  # Worm status: alive or dead.
-        self.x = 0  # Worm's starting x-coordinate (birth x-coordinate).
-        self.y = 0  # Worm's starting y-coordinate (birth y-coordinate).
+        self.body = [(1,0), (2,0), (3,0)]
+        self.max_health = self.health
+        self.max_hunger = self.hunger
+        self.state = 'alive'
+        self.age = 0
+        self.age_limit = random.randint(50, 100)
 
-        if self.health <= 0:  # Worm death logic.
+        if self.health <= 0:
             self.state = 'dead'
 
-    def tick(self):  # Logic for each program tick.
-        self.hunger -= 1
 
-        if self.hunger <= 0:
-            self.health -= 1
+class World:
+    def __init__(self):
+        self.size = np.array([20, 20])
+        self.grid = np.zeros(self.size)
+        self.worm = Worm()
 
-worm = Worm()
+        self.redraw()
+
+    def spawn_nutrition(self):
+        while True:
+            nutrition = Nutrition(self.size)
+            if self.grid[nutrition.x][nutrition.y] == 0:
+                self.nutrition = nutrition
+                self.grid[nutrition.x][nutrition.y] = 3
+                return
+
+    def tick(self):
+        if self.worm.state == 'dead':
+            return
+
+        self.worm.hunger -= 1
+        self.worm.age += 1
+
+        if self.worm.hunger <= 0:
+            self.worm.health -= 1
+
+        if self.worm.health <= 0 or self.worm.age >= self.worm.age_limit:
+            self.worm.state = 'dead'
+            return
+
+        self.move()
+        self.redraw()
+
+    def draw_worm(self):
+        for (x,y) in self.worm.body[:-1]:
+            self.grid[x][y] = 1
+
+        (x,y) = self.worm.body[-1]
+        self.grid[x][y] = 2
+
+    def move(self):
+        head_x, head_y = self.worm.body[-1]
+        new_head = (head_x + 1, head_y)
+
+        if 0 <= new_head[0] < self.size[0] and 0 <= new_head[1] < self.size[1]:
+            self.worm.body.append(new_head)
+            self.worm.body.pop(0)
+        
+
+
+
+    def redraw(self):
+        self.grid = np.zeros(self.size)
+        self.draw_worm()
+
 world = World()
+worm = world.worm
 
-for i in range(worm.length):  # Draw the worm on the grid according to its length.
-    world.grid[worm.x][worm.y] = 1
-    worm.x += 1
+plt.ion()
+figure, axis = plt.subplots()
 
-plt.imshow(world.grid, cmap=cmap)  # Display the grid with the worm using the color palette.
-plt.show()
+while True:
+    world.tick()
+    print(f'health: {worm.health}, hunger: {worm.hunger}')
+
+    axis.clear()
+    axis.imshow(world.grid, cmap=cmap)
+    plt.pause(0.1)
