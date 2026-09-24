@@ -3,15 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.colors import ListedColormap
 
-
 cmap = ListedColormap([
     '#202020',
     'white',
-    '#FCF2F7',
-])  # Empty cells, worm body, worm head, and nutrition.
-
-INTERNAL_TYPES = ['fatty', 'strong', 'weak', 'thin']
-
+    'green',
+    'red'
+])
 
 class Nutrition:
     def __init__(self, size):
@@ -19,45 +16,19 @@ class Nutrition:
         self.x = random.randint(0, size[0] - 1)
         self.y = random.randint(0, size[1] - 1)
 
-
-class Worm:
+class Cell:
     def __init__(self):
-        self.internals = random.choice(INTERNAL_TYPES)
-
-        match self.internals:
-            case 'strong':
-                self.health = random.randint(12, 18)
-                self.hunger = random.randint(12, 18)
-
-            case 'fatty':
-                self.health = random.randint(9, 15)
-                self.hunger = random.randint(20, 30)
-
-            case 'weak':
-                self.health = random.randint(5, 11)
-                self.hunger = random.randint(6, 15)
-
-            case 'thin':
-                self.health = random.randint(7, 13)
-                self.hunger = random.randint(5, 10)
-
-        self.body = [(1,0), (2,0), (3,0)]
-        self.max_health = self.health
-        self.max_hunger = self.hunger
-        self.state = 'alive'
-        self.age = 0
-        self.age_limit = random.randint(50, 100)
-
-        if self.health <= 0:
-            self.state = 'dead'
+        self.body = [(1,0)]
 
 
 class World:
     def __init__(self):
         self.size = np.array([20, 20])
         self.grid = np.zeros(self.size)
-        self.worm = Worm()
 
+        self.cell = Cell()
+        self.nutrition = None
+        self.spawn_nutrition()
         self.redraw()
 
     def spawn_nutrition(self):
@@ -69,54 +40,48 @@ class World:
                 return
 
     def tick(self):
-        if self.worm.state == 'dead':
-            return
-
-        self.worm.hunger -= 1
-        self.worm.age += 1
-
-        if self.worm.hunger <= 0:
-            self.worm.health -= 1
-
-        if self.worm.health <= 0 or self.worm.age >= self.worm.age_limit:
-            self.worm.state = 'dead'
-            return
-
         self.move()
+        if self.nutrition is not None and self.cell.body[0] == (self.nutrition.x, self.nutrition.y):
+            self.nutrition = None
+        if self.nutrition is None:
+            self.spawn_nutrition()
         self.redraw()
 
-    def draw_worm(self):
-        for (x,y) in self.worm.body[:-1]:
+    def draw_cell(self):
+        for (x,y) in self.cell.body:
             self.grid[x][y] = 1
 
-        (x,y) = self.worm.body[-1]
-        self.grid[x][y] = 2
 
     def move(self):
-        head_x, head_y = self.worm.body[-1]
-        new_head = (head_x + 1, head_y)
+        action_table = {
+            0: (0, -1),
+            1: (0, 1),
+            2: (-1, 0),
+            3: (1, 0),
+        }
 
-        if 0 <= new_head[0] < self.size[0] and 0 <= new_head[1] < self.size[1]:
-            self.worm.body.append(new_head)
-            self.worm.body.pop(0)
-        
+        x, y = self.cell.body[0]
+        new_cell = (x + 1, y)
 
+        if 0 <= new_cell[0] < self.size[0] and 0 <= new_cell[1] < self.size[1]:
+            self.cell.body.append(new_cell)
+            self.cell.body.pop(0)
 
 
     def redraw(self):
         self.grid = np.zeros(self.size)
-        self.draw_worm()
+        self.draw_cell()
+        if self.nutrition is not None:
+            self.grid[self.nutrition.x][self.nutrition.y] = 3
 
 world = World()
-worm = world.worm
+cell = world.cell
 
 plt.ion()
 figure, axis = plt.subplots()
 
 while True:
     world.tick()
-    print(f'health: {worm.health}, hunger: {worm.hunger}')
-
     axis.clear()
     axis.imshow(world.grid, cmap=cmap)
     plt.pause(0.1)
