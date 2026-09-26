@@ -2,3 +2,5 @@
 .idea/
 *.iml
 __pycache__/
+1.py
+q_table.pkl
