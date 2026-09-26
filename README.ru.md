@@ -33,6 +33,39 @@ pip install -r requirements.txt
 .venv\Scripts\activate
 ```
 
+### macOS
+
+Если Python ещё не установлен, установите его через [Homebrew](https://brew.sh/):
+
+```bash
+brew install python
+```
+
+Создайте виртуальное окружение, активируйте его и установите зависимости:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+### Linux
+
+В Debian или Ubuntu установите Python, модуль виртуального окружения и Tk-backend для Matplotlib:
+
+```bash
+sudo apt update
+sudo apt install python3 python3-venv python3-tk
+```
+
+Затем создайте виртуальное окружение и установите зависимости:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
 ## Запуск
 
 ```bash
@@ -49,7 +82,7 @@ python main.py
 
 ## Параметры обучения
 
-Основные параметры находятся в `agent.py`:
+Основные параметры находятся в `src/agent.py`:
 
 | Параметр | Значение | Назначение |
 | --- | ---: | --- |
@@ -72,11 +105,18 @@ python main.py
 При необходимости части проекта можно запускать отдельно:
 
 ```bash
-python train.py
-python demo.py
+python -m src.train
+python -m src.demo
 ```
 
-Сначала запускайте `train.py`, если Q-таблица ещё не создана или была удалена. Затем запускайте `demo.py` для просмотра результата.
+Эти команды нужно запускать из корня проекта как модули пакета `src`:
+
+```bash
+python -m src.train
+python -m src.demo
+```
+
+Сначала запускайте `src.train`, если Q-таблица ещё не создана или была удалена. Затем запускайте `src.demo` для просмотра результата.
 
 ## Что происходит во время запуска
 
@@ -95,7 +135,7 @@ python demo.py
 На Linux может понадобиться графический backend Matplotlib. Если программа запускается на сервере без графического интерфейса, визуальное окно открыть нельзя. В таком случае обучение можно запустить отдельно:
 
 ```bash
-python train.py
+python -m src.train
 ```
 
 Если зависимости установлены не в активное виртуальное окружение, установите их так:
@@ -118,10 +158,10 @@ python -m pip install -r requirements.txt
 | Файл | Назначение |
 | --- | --- |
 | `main.py` | Запускает обучение и визуализацию по очереди |
-| `env.py` | Описывает мир, клетку, еду, движение, награды и сетку для отображения |
-| `agent.py` | Хранит Q-таблицу и выбирает действия |
-| `train.py` | Обучает агента и сохраняет `q_table.pkl` |
-| `demo.py` | Показывает обученного агента через Matplotlib |
+| `src/env.py` | Описывает мир, клетку, еду, движение, награды и сетку для отображения |
+| `src/agent.py` | Хранит Q-таблицу и выбирает действия |
+| `src/train.py` | Обучает агента и сохраняет `q_table.pkl` |
+| `src/demo.py` | Показывает обученного агента через Matplotlib |
 
 ## Статус
 

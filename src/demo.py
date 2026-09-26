@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
-from env import world, cmap
+from .env import world, cmap
 import numpy as np
-from agent import q_table
+from .agent import q_table
 
 plt.ion()
 figure, axis = plt.subplots()

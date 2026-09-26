@@ -33,6 +33,39 @@ On Windows, activate the environment with:
 .venv\Scripts\activate
 ```
 
+### macOS
+
+Install Python with [Homebrew](https://brew.sh/) if it is not already installed:
+
+```bash
+brew install python
+```
+
+Create and activate the virtual environment, then install the dependencies:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+### Linux
+
+On Debian or Ubuntu, install Python, the virtual environment module, and the Tk backend used by Matplotlib:
+
+```bash
+sudo apt update
+sudo apt install python3 python3-venv python3-tk
+```
+
+Then create the environment and install the dependencies:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
 ## Run
 
 ```bash
@@ -49,7 +82,7 @@ The generated `q_table.pkl` file is local training data and is ignored by Git.
 
 ## Training Parameters
 
-The main parameters are defined in `agent.py`:
+The main parameters are defined in `src/agent.py`:
 
 | Parameter | Value | Purpose |
 | --- | ---: | --- |
@@ -72,11 +105,18 @@ python main.py
 The parts can also be run separately:
 
 ```bash
-python train.py
-python demo.py
+python -m src.train
+python -m src.demo
 ```
 
-Run `train.py` first if the Q-table does not exist or has been deleted. Then run `demo.py` to view the result.
+Run these commands from the project root with the `src` package path:
+
+```bash
+python -m src.train
+python -m src.demo
+```
+
+Run `src.train` first if the Q-table does not exist or has been deleted. Then run `src.demo` to view the result.
 
 ## What Happens During Run
 
@@ -95,7 +135,7 @@ To stop the demonstration, close the Matplotlib window or press `Ctrl+C` in the 
 On Linux, Matplotlib may require a graphical backend. If the project is running on a server without a graphical interface, the visualization window cannot be opened. Training can still be run separately:
 
 ```bash
-python train.py
+python -m src.train
 ```
 
 If the dependencies were not installed in the active virtual environment, install them with:
@@ -118,10 +158,10 @@ python -m pip install -r requirements.txt
 | File | Purpose |
 | --- | --- |
 | `main.py` | Runs training and visualization in order |
-| `env.py` | Defines the world, cell, food, movement, rewards, and rendering grid |
-| `agent.py` | Stores the Q-table and chooses actions |
-| `train.py` | Trains the agent and saves `q_table.pkl` |
-| `demo.py` | Displays the trained agent with Matplotlib |
+| `src/env.py` | Defines the world, cell, food, movement, rewards, and rendering grid |
+| `src/agent.py` | Stores the Q-table and chooses actions |
+| `src/train.py` | Trains the agent and saves `q_table.pkl` |
+| `src/demo.py` | Displays the trained agent with Matplotlib |
 
 ## Status
 

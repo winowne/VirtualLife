@@ -1,5 +1,5 @@
-from env import world
-from agent import q_table, choose_action, epsilon, gamma, alpha
+from .env import world
+from .agent import q_table, choose_action, epsilon, gamma, alpha
 import numpy as np
 import pickle
 
