@@ -19,7 +19,7 @@ for i in range(3000):
 
     epsilon = max(epsilon * 0.995, 0.05)
 
-    print(total_reward)
+    print(total_reward, world.step_count)
 
 with open('q_table.pkl','wb') as f:
     pickle.dump(dict(q_table), f)

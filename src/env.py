@@ -1,6 +1,7 @@
 import random
 import numpy as np
 from matplotlib.colors import ListedColormap
+from collections import deque
 
 # Значения сетки соответствуют цветам: 0 — пустая клетка, 1 — тело, 2 — еда.
 cmap = ListedColormap([
@@ -17,7 +18,6 @@ action_table = {
             3: (1, 0),
         }
 
-
 class Nutrition:
     def __init__(self, size):
         self.x = random.randint(0, size[0] - 1)
@@ -30,6 +30,16 @@ class Cell:
         self.health = 100
         self.max_health = self.health
         self.max_hunger = self.hunger
+        self.state = 'alive'
+
+    def update_status(self):
+        if self.hunger <= 0:
+            self.health -= 1
+
+        if self.health <= 0:
+            self.state = 'dead'
+
+        
 
 class World:
     def __init__(self):
@@ -70,36 +80,63 @@ class World:
         x, y = self.cell.body[0]
         # Агент получает не абсолютные координаты, а расстояние до еды.
         difference = x - self.nutrition.x, y - self.nutrition.y
-        return difference
+
+        if self.cell.hunger <= 33:
+            hunger_level = 'little'
+        elif self.cell.hunger <= 66:
+            hunger_level = 'medium'
+        else:
+            hunger_level = 'many'
+
+        return difference, hunger_level
     
     def reset(self):
         self.step_count = 0
         self.grid = np.zeros(self.size)
-        self.cell.body = [(1,0)]
+        self.cell = Cell()
         self.nutrition = None
         self.spawn_nutrition()
         self.episode += 1
         return self.get_state()
     
     def step(self, action):
+        self.cell.hunger -= 1
+        self.cell.update_status()
+
         reward = 0
         self.step_count += 1
         moved = self.move(action)
-
-        
 
         # Агент получает небольшую награду за движение и штраф за столкновение со стеной.
         if moved:
             reward -= 0.01
         else:
             reward -= 1
+
         if self.cell.body[0] == (self.nutrition.x, self.nutrition.y):
-            reward += 1
+            _, hunger_level = self.get_state()
+
+            if hunger_level == 'many':
+                reward += 1
+            elif hunger_level == 'medium':
+                reward += 2
+            else:
+                reward += 3
+
+            if self.cell.hunger >= self.cell.max_hunger - 1:
+                if self.cell.health < self.cell.max_health:
+                    self.cell.health += 1
+                    reward += 0.5
+                else:
+                    reward += 0.1
+            else:
+                self.cell.hunger = min(self.cell.hunger + 10, self.cell.max_hunger)
+
             self.nutrition = None
             self.spawn_nutrition()
 
         # Эпизод заканчивается после заданного количества шагов.
-        done = self.step_count >= self.max_steps
+        done = self.step_count >= self.max_steps or self.cell.state == 'dead'
 
         return self.get_state(), reward, done
 
