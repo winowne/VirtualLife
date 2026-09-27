@@ -18,6 +18,8 @@ action_table = {
             3: (1, 0),
         }
 
+opposite_action = {0: 1, 1: 0, 2: 3, 3: 2}
+
 class Nutrition:
     def __init__(self, size):
         self.x = random.randint(0, size[0] - 1)
@@ -31,6 +33,7 @@ class Cell:
         self.max_health = self.health
         self.max_hunger = self.hunger
         self.state = 'alive'
+        self.last_actions = deque(maxlen=3)
 
     def update_status(self):
         if self.hunger <= 0:
@@ -39,6 +42,7 @@ class Cell:
         if self.health <= 0:
             self.state = 'dead'
 
+        
         
 
 class World:
@@ -106,6 +110,12 @@ class World:
         reward = 0
         self.step_count += 1
         moved = self.move(action)
+
+        self.cell.last_actions.append(action)
+
+        if len(self.cell.last_actions) == 3:
+            if self.cell.last_actions[2] == opposite_action[self.cell.last_actions[0]]:
+                reward -= 0.1
 
         # Агент получает небольшую награду за движение и штраф за столкновение со стеной.
         if moved:
